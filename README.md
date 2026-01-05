@@ -1,2 +1,24 @@
-# 30-Days-sql-challenge
-This is a SQL coding challenge that I made with students in mind. I have compiled a collection of easy, medium, and hard difficulty challenges to help prepare for technical interviews. I have taken practice problems I have done as well as researched the types of problems that are commonly seen.
+# 30 Days of SQL Challenge
+
+🚀 **[Launch Challenge](https://roadrunner1805.github.io/30-Days-sql-challenge/Code_Challenge.html)**
+
+College-themed SQL challenges to help you ace technical interviews!
+
+## Features
+- 30 progressive challenges (Easy, Medium, Hard)
+- Interactive SQL editor with instant feedback
+- Track your progress with visual checkmarks
+- Browser-based - no installation required
+
+## How to Use
+Click the launch link above and start solving SQL challenges! Complete all 30 days to earn your completion certificate.
+
+## Challenge Levels
+- **Easy (Days 1, 4, 7, ...)**: Basic SELECT, WHERE, ORDER BY
+- **Medium (Days 2, 5, 8, ...)**: JOINs, GROUP BY, subqueries
+- **Hard (Days 3, 6, 9, ...)**: Window functions, CTEs, advanced queries
+
+## About
+This project was created to help students prepare for technical interviews with hands-on SQL practice. Each challenge includes automatic grading and tracks your progress locally in your browser.
+
+Good luck! 🎒
