@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>30 Days of SQL Challenge</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(to bottom, #ffffff, #f0f0f0);
+            color: #000000;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        h1 {
+            text-align: center;
+            color: #000000;
+            font-size: 2.8em;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 2px #FFD700;
+        }
+        .subtitle {
+            text-align: center;
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 40px;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 20px;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+        .day-card {
+            background: linear-gradient(to bottom, #FFD700, #B8860B);
+            color: #000000;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            border: 3px solid #000000;
+        }
+        .day-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.4);
+        }
+        .backpack {
+            font-size: 4em;
+            margin-bottom: 10px;
+        }
+        .day-number {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+        .level {
+            font-size: 1.1em;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .completed::after {
+            content: '✓';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 2em;
+            color: #000000;
+            background: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            border: 3px solid #000000;
+        }
+        #challenge-view, #completion-view {
+            display: none;
+            max-width: 1200px;
+            margin: 40px auto;
+            text-align: center;
+        }
+        #completion-view h1 {
+            font-size: 3.8em;
+            color: #FFD700;
+            text-shadow: 3px 3px 6px #000;
+            margin-bottom: 20px;
+        }
+        #completion-view p {
+            font-size: 1.6em;
+            margin: 30px 0;
+        }
+        #name-section {
+            margin: 40px 0;
+        }
+        #name-input {
+            font-size: 1.6em;
+            padding: 15px 20px;
+            width: 360px;
+            max-width: 90%;
+            border: 4px solid #000;
+            border-radius: 12px;
+            text-align: center;
+        }
+        #official-message {
+            font-size: 2.8em;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 3px 3px 6px #000;
+            margin: 60px 0;
+            line-height: 1.4;
+            display: none;
+        }
+        #back-button {
+            background: #000000;
+            color: #FFD700;
+            border: none;
+            padding: 14px 30px;
+            font-size: 1.3em;
+            cursor: pointer;
+            border-radius: 10px;
+            font-weight: bold;
+            margin-top: 40px;
+        }
+        .challenge-container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        .prompt-section, .editor-section {
+            flex: 1;
+            min-width: 350px;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+            border: 2px solid #000000;
+        }
+        .prompt-section h2 {
+            color: #000000;
+            margin-top: 0;
+            font-size: 1.8em;
+            border-bottom: 3px solid #FFD700;
+            padding-bottom: 10px;
+        }
+        .prompt-section pre {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            white-space: pre-wrap;
+            font-size: 1.1em;
+            line-height: 1.6;
+            border: 1px solid #ccc;
+        }
+        #code {
+            width: 100%;
+            height: 450px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            padding: 15px;
+            border: 2px solid #000000;
+            border-radius: 10px;
+            background: #000000;
+            color: #FFD700;
+        }
+        #submit-btn {
+            background: #000000;
+            color: #FFD700;
+            border: 2px solid #FFD700;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        #submit-btn:hover {
+            background: #FFD700;
+            color: #000000;
+        }
+        #result {
+            margin-top: 30px;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <div id="landing">
+        <h1>30 Days of SQL Challenge</h1>
+        <p class="subtitle">College-themed SQL challenges to help you ace technical interviews</p>
+        <div class="calendar-grid" id="calendar-grid"></div>
+    </div>
+
+    <div id="challenge-view">
+        <button onclick="backToLanding()">← Back to Calendar</button>
+        <div class="challenge-container">
+            <div class="prompt-section">
+                <h2 id="challenge-title"></h2>
+                <pre id="challenge-prompt"></pre>
+            </div>
+            <div class="editor-section">
+                <textarea id="code" placeholder="-- Write your SQL query here"></textarea>
+                <button id="submit-btn" onclick="gradeChallenge()">Submit Query</button>
+                <div id="result"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="completion-view">
+        <h1>🎉 Congratulations! 🎉</h1>
+        <p>You've completed all 30 days of the SQL Challenge!</p>
+        <div id="name-section">
+            <p>Enter your name and press Enter for your official completion message:</p>
+            <input type="text" id="name-input" placeholder="Your name" maxlength="40">
+        </div>
+        <div id="official-message"></div>
+        <button id="back-button" onclick="backToLanding()">← Back to Calendar</button>
+    </div>
+
+    <script>
+        let currentChallenge = null;
+        let SQL = null;
+        let completedDays = JSON.parse(localStorage.getItem('sqlChallengeCompleted') || '{}');
+        let viewingCompletion = false;
+
+        const config = { locateFile: (file) => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/${file}` };
+        initSqlJs(config).then(function(sql) { SQL = sql; });
+
+        const easyChallenges = [
+            { title: "High GPA Students", prompt: "Select the names of students with GPA > 3.5. Order by name ASC.\n\nTable: students(student_id, name, gpa)", expected: [{"name":"Alice"},{"name":"Charlie"},{"name":"David"}], create_sql: `CREATE TABLE students (student_id INTEGER, name TEXT, gpa REAL); INSERT INTO students VALUES (1,'Alice',3.8),(2,'Bob',3.2),(3,'Charlie',3.9),(4,'David',3.6);` },
+            { title: "Freshman Count", prompt: "Count the number of students whose year is 'Freshman'.\n\nTable: students(year TEXT)", expected: [{"COUNT(*)":3}], create_sql: `CREATE TABLE students (student_id INTEGER, year TEXT); INSERT INTO students VALUES (1,'Freshman'),(2,'Sophomore'),(3,'Freshman'),(4,'Freshman');` },
+            { title: "CS Majors", prompt: "Select names of students majoring in 'Computer Science'.\n\nTable: students(major TEXT, name TEXT)", expected: [{"name":"Alice"},{"name":"Charlie"}], create_sql: `CREATE TABLE students (major TEXT, name TEXT); INSERT INTO students VALUES ('Computer Science','Alice'),('Mathematics','Bob'),('Computer Science','Charlie');` },
+            { title: "Top Exam Scores", prompt: "Select the top 3 exam scores, ordered descending.\n\nTable: exams(score INTEGER)", expected: [{"score":100},{"score":95},{"score":92}], create_sql: `CREATE TABLE exams (score INTEGER); INSERT INTO exams VALUES (95),(88),(100),(92),(85);` },
+            { title: "Late Registrations", prompt: "Find students who registered after '2025-01-01'.\n\nTable: registrations(name TEXT, reg_date DATE)", expected: [{"name":"Alice"},{"name":"Charlie"}], create_sql: `CREATE TABLE registrations (name TEXT, reg_date DATE); INSERT INTO registrations VALUES ('Alice','2025-01-05'),('Bob','2024-12-30'),('Charlie','2025-02-01');` },
+            { title: "Unique Majors", prompt: "Count distinct majors.\n\nTable: students(major TEXT)", expected: [{"COUNT(DISTINCT major)":3}], create_sql: `CREATE TABLE students (major TEXT); INSERT INTO students VALUES ('CS'),('Math'),('CS'),('Biology');` },
+            { title: "Scholarship Eligible", prompt: "Select students with GPA >= 3.8.\n\nTable: students(name TEXT, gpa REAL)", expected: [{"name":"Alice"},{"name":"Charlie"}], create_sql: `CREATE TABLE students (name TEXT, gpa REAL); INSERT INTO students VALUES ('Alice',3.9),('Bob',3.7),('Charlie',4.0);` },
+            { title: "Dorm A Residents", prompt: "List students living in 'Dorm A'.\n\nTable: dorms(name TEXT, dorm TEXT)", expected: [{"name":"Alice"},{"name":"Charlie"}], create_sql: `CREATE TABLE dorms (name TEXT, dorm TEXT); INSERT INTO dorms VALUES ('Alice','A'),('Bob','B'),('Charlie','A');` },
+            { title: "Average Math Score", prompt: "Calculate average score for Math class.\n\nTable: grades(class TEXT, score INTEGER)", expected: [{"AVG(score)":87.5}], create_sql: `CREATE TABLE grades (class TEXT, score INTEGER); INSERT INTO grades VALUES ('Math',90),('Math',85),('CS',95);` },
+            { title: "Sorted Clubs", prompt: "List club names in alphabetical order.\n\nTable: clubs(name TEXT)", expected: [{"name":"Art"},{"name":"Chess"},{"name":"Debate"}], create_sql: `CREATE TABLE clubs (name TEXT); INSERT INTO clubs VALUES ('Chess'),('Debate'),('Art');` }
+        ];
+
+        const mediumChallenges = [
+            { title: "Student Departments", prompt: "Show student name and department name.\n\nTables: students(name, dept_id), departments(id, name)", expected: [{"name":"Alice","department":"Computer Science"},{"name":"Bob","department":"Mathematics"},{"name":"Charlie","department":"Computer Science"}], create_sql: `CREATE TABLE departments (id INTEGER, name TEXT); INSERT INTO departments VALUES (1,'Computer Science'),(2,'Mathematics'); CREATE TABLE students (name TEXT, dept_id INTEGER); INSERT INTO students VALUES ('Alice',1),('Bob',2),('Charlie',1);` },
+            { title: "Students per Department", prompt: "Count students per department.\n\nTables: students(dept_id), departments(id, name)", expected: [{"department":"CS","count":3},{"department":"Math","count":1}], create_sql: `CREATE TABLE departments (id INTEGER, name TEXT); INSERT INTO departments VALUES (1,'CS'),(2,'Math'); CREATE TABLE students (dept_id INTEGER); INSERT INTO students VALUES (1),(1),(1),(2);` },
+            { title: "Above Average GPA", prompt: "Find students with GPA above the overall average.\n\nTable: students(name, gpa)", expected: [{"name":"Alice"},{"name":"Charlie"}], create_sql: `CREATE TABLE students (name TEXT, gpa REAL); INSERT INTO students VALUES ('Alice',3.8),('Bob',3.2),('Charlie',3.9);` },
+            { title: "Enrollment Category", prompt: "Use CASE to label enrollment year as 'Recent' (>=2024) or 'Older'.\n\nTable: students(enroll_year INTEGER)", expected: [{"enroll_year":2023,"category":"Older"},{"enroll_year":2024,"category":"Recent"},{"enroll_year":2025,"category":"Recent"}], create_sql: `CREATE TABLE students (enroll_year INTEGER); INSERT INTO students VALUES (2024),(2023),(2025);` },
+            { title: "Popular Courses", prompt: "Find courses with more than 2 enrollments.\n\nTables: courses(id, name), enrollments(course_id)", expected: [{"name":"CS101"}], create_sql: `CREATE TABLE courses (id INTEGER, name TEXT); INSERT INTO courses VALUES (1,'CS101'),(2,'Math201'); CREATE TABLE enrollments (course_id INTEGER); INSERT INTO enrollments VALUES (1),(1),(1),(2);` },
+            { title: "Duplicate Emails", prompt: "Find emails that appear more than once.\n\nTable: students(email TEXT)", expected: [{"email":"a@x.com"}], create_sql: `CREATE TABLE students (email TEXT); INSERT INTO students VALUES ('a@x.com'),('b@x.com'),('a@x.com');` },
+            { title: "Grade Letters", prompt: "Convert numeric scores to letter grades using CASE.\nA >=90, B >=80, else C.\n\nTable: grades(score INTEGER)", expected: [{"score":95,"letter":"A"},{"score":85,"letter":"B"},{"score":70,"letter":"C"}], create_sql: `CREATE TABLE grades (score INTEGER); INSERT INTO grades VALUES (95),(85),(70);` },
+            { title: "Department Avg GPA", prompt: "Average GPA per department.\n\nTables: students(gpa, dept_id), departments(id, name)", expected: [{"department":"CS","avg_gpa":3.5},{"department":"Math","avg_gpa":4.0}], create_sql: `CREATE TABLE departments (id INTEGER, name TEXT); INSERT INTO departments VALUES (1,'CS'),(2,'Math'); CREATE TABLE students (gpa REAL, dept_id INTEGER); INSERT INTO students VALUES (3.8,1),(3.2,1),(4.0,2);` },
+            { title: "LEFT JOIN Example", prompt: "Show all students and their advisor name (if any).\n\nTables: students(id, name, advisor_id), advisors(id, name)", expected: [{"name":"Alice","advisor_name":"Prof. Smith"},{"name":"Bob","advisor_name":null}], create_sql: `CREATE TABLE advisors (id INTEGER, name TEXT); INSERT INTO advisors VALUES (1,'Prof. Smith'); CREATE TABLE students (id INTEGER, name TEXT, advisor_id INTEGER); INSERT INTO students VALUES (1,'Alice',1),(2,'Bob',NULL);` },
+            { title: "Subquery GPA", prompt: "Find students with GPA > average GPA.\n\nTable: students(name, gpa)", expected: [{"name":"Alice"}], create_sql: `CREATE TABLE students (name TEXT, gpa REAL); INSERT INTO students VALUES ('Alice',3.9),('Bob',3.5),('Charlie',3.7);` }
+        ];
+
+        const hardChallenges = [
+            { title: "Rank Students by GPA", prompt: "Rank students by GPA descending using ROW_NUMBER().\n\nTable: students(name, gpa)", expected: [{"name":"Bob","rn":1},{"name":"Alice","rn":2},{"name":"Charlie","rn":3}], create_sql: `CREATE TABLE students (name TEXT, gpa REAL); INSERT INTO students VALUES ('Alice',3.8),('Bob',3.9),('Charlie',3.7);` },
+            { title: "Top Student per Dept", prompt: "Find the student with highest GPA in each department.\n\nTables: students(name, gpa, dept_id), departments(id, name)", expected: [{"department":"CS","student":"Bob"},{"department":"Math","student":"Charlie"}], create_sql: `CREATE TABLE departments (id INTEGER, name TEXT); INSERT INTO departments VALUES (1,'CS'),(2,'Math'); CREATE TABLE students (name TEXT, gpa REAL, dept_id INTEGER); INSERT INTO students VALUES ('Alice',3.8,1),('Bob',3.9,1),('Charlie',4.0,2);` },
+            { title: "Running Total Credits", prompt: "Calculate running total of credits earned.\nOrder by semester.\n\nTable: semesters(semester TEXT, credits INTEGER)", expected: [{"semester":"Fall24","running":15},{"semester":"Spring25","running":33},{"semester":"Fall25","running":45}], create_sql: `CREATE TABLE semesters (semester TEXT, credits INTEGER); INSERT INTO semesters VALUES ('Fall24',15),('Spring25',18),('Fall25',12);` },
+            { title: "2nd Highest GPA", prompt: "Find the 2nd highest distinct GPA.\n\nTable: students(gpa REAL)", expected: [{"gpa":3.9}], create_sql: `CREATE TABLE students (gpa REAL); INSERT INTO students VALUES (3.8),(4.0),(3.8),(3.9);` },
+            { title: "Pivot Subject Grades", prompt: "Pivot grades to columns: Math, CS, English using conditional aggregation.\n\nTable: grades(student, subject, grade)", expected: [{"student":"Alice","Math":90,"CS":95,"English":null},{"student":"Bob","Math":85,"CS":null,"English":null}], create_sql: `CREATE TABLE grades (student TEXT, subject TEXT, grade INTEGER); INSERT INTO grades VALUES ('Alice','Math',90),('Alice','CS',95),('Bob','Math',85);` },
+            { title: "YoY Growth %", prompt: "Calculate year-over-year enrollment growth percentage.\n\nTable: enrollment(year INTEGER, students INTEGER)", expected: [{"year":2025,"growth":20.0}], create_sql: `CREATE TABLE enrollment (year INTEGER, students INTEGER); INSERT INTO enrollment VALUES (2024,100),(2025,120);` },
+            { title: "Self-Join Hierarchy", prompt: "Count number of advisees per advisor (including 0).\n\nTable: students(id, name, advisor_id)", expected: [{"name":"Prof Smith","advisee_count":2},{"name":"Prof Jones","advisee_count":0}], create_sql: `CREATE TABLE students (id INTEGER, name TEXT, advisor_id INTEGER); INSERT INTO students VALUES (1,'Alice',3),(2,'Bob',3),(3,'Prof Smith',NULL),(4,'Prof Jones',NULL);` },
+            { title: "LAG for Change", prompt: "Show GPA change from previous semester using LAG.\n\nTable: records(semester TEXT, gpa REAL)", expected: [{"semester":"Fall24","change":null},{"semester":"Spring25","change":0.2},{"semester":"Fall25","change":-0.1}], create_sql: `CREATE TABLE records (semester TEXT, gpa REAL); INSERT INTO records VALUES ('Fall24',3.5),('Spring25',3.7),('Fall25',3.6);` },
+            { title: "NTILE Quartiles", prompt: "Divide students into 4 GPA quartiles using NTILE.\n\nTable: students(name, gpa)", expected: [{"quartile":1},{"quartile":2},{"quartile":3},{"quartile":4}], create_sql: `CREATE TABLE students (name TEXT, gpa REAL); INSERT INTO students VALUES ('A',4.0),('B',3.8),('C',3.5),('D',3.2);` },
+            { title: "Complex Window", prompt: "Find students whose current GPA is higher than their department average.\nUse window functions.\n\nTables: students(name, gpa, dept_id), departments(id, name)", expected: [{"name":"Alice"},{"name":"Charlie"}], create_sql: `CREATE TABLE departments (id INTEGER, name TEXT); INSERT INTO departments VALUES (1,'CS'),(2,'Math'); CREATE TABLE students (name TEXT, gpa REAL, dept_id INTEGER); INSERT INTO students VALUES ('Alice',3.9,1),('Bob',3.7,1),('Charlie',4.0,2);` }
+        ];
+
+        const challenges = [];
+        for (let day = 1; day <= 30; day++) {
+            const idx = Math.floor((day - 1) / 3);
+            let base;
+            if (day % 3 === 1) {
+                base = easyChallenges[idx % easyChallenges.length];
+                base.level = 'Easy';
+            } else if (day % 3 === 2) {
+                base = mediumChallenges[idx % mediumChallenges.length];
+                base.level = 'Medium';
+            } else {
+                base = hardChallenges[idx % hardChallenges.length];
+                base.level = 'Hard';
+            }
+            challenges.push({ ...base, day: day });
+        }
+
+        function createCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+            for (let day = 1; day <= 30; day++) {
+                const challenge = challenges.find(c => c.day === day);
+                const isCompleted = completedDays[day];
+                const card = document.createElement('div');
+                card.className = `day-card ${isCompleted ? 'completed' : ''}`;
+                card.innerHTML = `
+                    <div class="backpack">🎒</div>
+                    <div class="day-number">Day ${day}</div>
+                    <div class="level">${challenge.level}</div>
+                `;
+                card.onclick = () => loadChallenge(challenge);
+                grid.appendChild(card);
+            }
+        }
+        
+        function checkAndShowCompletion() {
+            if (Object.keys(completedDays).length === 30 && !viewingCompletion) {
+                document.getElementById('landing').style.display = 'none';
+                document.getElementById('completion-view').style.display = 'block';
+                document.getElementById('name-input').focus();
+                viewingCompletion = true;
+            }
+        }
+
+        function loadChallenge(challenge) {
+            currentChallenge = challenge;
+            document.getElementById('landing').style.display = 'none';
+            document.getElementById('challenge-view').style.display = 'block';
+            document.getElementById('completion-view').style.display = 'none';
+            document.getElementById('challenge-title').textContent = `Day ${challenge.day}: ${challenge.title} (${challenge.level})`;
+            document.getElementById('challenge-prompt').textContent = challenge.prompt;
+            document.getElementById('code').value = '-- Write your SQL query here\n';
+            document.getElementById('result').textContent = '';
+        }
+
+        function backToLanding() {
+            viewingCompletion = true; // Keep this true so we don't auto-redirect back
+            document.getElementById('landing').style.display = 'block';
+            document.getElementById('challenge-view').style.display = 'none';
+            document.getElementById('completion-view').style.display = 'none';
+            createCalendar();
+        }
+
+        function gradeChallenge() {
+            if (!SQL) {
+                document.getElementById('result').innerHTML = '<span class="error">Loading SQL engine...</span>';
+                return;
+            }
+            const userQuery = document.getElementById('code').value.trim();
+            if (!userQuery.toUpperCase().startsWith('SELECT')) {
+                document.getElementById('result').innerHTML = '<span class="error">Must be a SELECT query.</span>';
+                return;
+            }
+
+            const db = new SQL.Database();
+            try {
+                db.run(currentChallenge.create_sql);
+                const stmt = db.prepare(userQuery);
+                let results = [];
+                while (stmt.step()) results.push(stmt.getAsObject());
+                stmt.free();
+
+                const sortFn = (a,b) => JSON.stringify(Object.entries(a).sort()).localeCompare(JSON.stringify(Object.entries(b).sort()));
+                results.sort(sortFn);
+                const expectedSorted = [...currentChallenge.expected].sort(sortFn);
+
+                if (JSON.stringify(results) === JSON.stringify(expectedSorted)) {
+                    document.getElementById('result').innerHTML = '<span class="success">Correct! ✓</span>';
+                    completedDays[currentChallenge.day] = true;
+                    localStorage.setItem('sqlChallengeCompleted', JSON.stringify(completedDays));
+                    setTimeout(() => {
+                        backToLanding();
+                    }, 1500);
+                } else {
+                    document.getElementById('result').innerHTML = '<span class="error">Not quite right — try again!</span>';
+                }
+            } catch (e) {
+                document.getElementById('result').innerHTML = `<span class="error">Error: ${e.message}</span>`;
+            }
+        }
+
+        // Completion screen name handling
+        const nameInput = document.getElementById('name-input');
+        const nameSection = document.getElementById('name-section');
+        const officialMessage = document.getElementById('official-message');
+
+        nameInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const name = this.value.trim();
+                if (name) {
+                    nameSection.style.display = 'none';
+                    officialMessage.innerHTML = `
+                        🏆 <strong>${name}</strong>,<br>
+                        you have officially conquered<br>
+                        the 30 Days of SQL Challenge! 🏆
+                    `;
+                    officialMessage.style.display = 'block';
+                }
+            }
+        });
+
+        createCalendar();
+        checkAndShowCompletion();
+    </script>
+</body>
+</html>
